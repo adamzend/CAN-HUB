@@ -4,4 +4,4 @@ fastapi==0.115.11
 uvicorn==0.32.0
 pymodbus==3.8.6
 python-can>=4.3,<5
-Pillow==11.1.0
+Pillow==13.0.0
