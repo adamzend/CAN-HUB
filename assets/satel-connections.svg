@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8" fill="none" stroke="#4b6d88" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="100%" rx="18" fill="#f1f5f9"/>
+<text x="40" y="47" font-family="Arial" font-size="27" font-weight="bold" fill="#102e45">SATEL INTEGRA · funkcja opcjonalna w fazie testów</text>
+<text x="40" y="78" font-family="Arial" font-size="17" fill="#496277">Oddzielny tor Ethernet — nie jest częścią magistrali CAN</text>
+<path d="M300 170 L470 170" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="323" y="146" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">SATEL TCP/IP</text>
+<path d="M730 170 L900 170" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="752" y="146" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">HTTP / Modbus</text>
+<rect x="40" y="120" width="260" height="100" rx="13" fill="#fff0cb" stroke="#b6c9d7"/>
+<text x="58" y="151" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">SATEL INTEGRA</text>
+<text x="58" y="178" font-family="Arial" font-size="16" fill="#304e65">Centrala alarmowa</text>
+<text x="58" y="201" font-family="Arial" font-size="16" fill="#304e65">ETHM-1 / ETHM-1 Plus</text>
+<rect x="470" y="120" width="260" height="100" rx="13" fill="#d9f3eb" stroke="#b6c9d7"/>
+<text x="488" y="151" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">CAN HUB</text>
+<text x="488" y="178" font-family="Arial" font-size="16" fill="#304e65">Usługa integracji SATEL</text>
+<text x="488" y="201" font-family="Arial" font-size="16" fill="#304e65">Stan, jakość, wiek danych</text>
+<rect x="900" y="120" width="260" height="100" rx="13" fill="#e1f2fa" stroke="#b6c9d7"/>
+<text x="918" y="151" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">WWW / Weintek HMI</text>
+<text x="918" y="178" font-family="Arial" font-size="16" fill="#304e65">WWW: podgląd integracji</text>
+<text x="918" y="201" font-family="Arial" font-size="16" fill="#304e65">HMI: odczyt Modbus TCP</text>
+<text x="40" y="282" font-family="Arial" font-size="16" fill="#496277">Polecenia sterujące WWW są opcjonalne. Zapis poleceń SATEL przez Modbus/HMI nie jest zaimplementowany.</text>
+</svg>

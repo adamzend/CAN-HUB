@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8" fill="none" stroke="#4b6d88" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="100%" rx="18" fill="#f1f5f9"/>
+<text x="40" y="47" font-family="Arial" font-size="27" font-weight="bold" fill="#102e45">Szklarnia · moduł ESP32, NODE_ID 3</text>
+<text x="40" y="78" font-family="Arial" font-size="17" fill="#496277">Schemat funkcjonalny — opisane numery to GPIO ESP32, nie numery pinów złącza</text>
+<path d="M340 175 L480 315" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="366" y="218" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">1-Wire</text>
+<path d="M340 330 L480 355" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="376" y="319" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">DATA</text>
+<path d="M340 485 L480 405" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="361" y="469" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">I²C: 21 / 22</text>
+<path d="M340 645 L480 445" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="360" y="580" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">I²C: 21 / 22</text>
+<path d="M760 330 L890 235" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="770" y="263" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">SPI + INT</text>
+<path d="M1025 295 L1025 410" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="1040" y="356" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">SPI 100 kHz</text>
+<path d="M1025 520 L1025 620" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="1040" y="578" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">CAN</text>
+<rect x="40" y="125" width="300" height="100" rx="13" fill="#e1f2fa" stroke="#b6c9d7"/>
+<text x="58" y="156" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">4 × DS18B20</text>
+<text x="58" y="183" font-family="Arial" font-size="16" fill="#304e65">DQ: GPIO14 · zasilanie 3,3 V</text>
+<text x="58" y="206" font-family="Arial" font-size="16" fill="#304e65">4,7 kΩ: DQ → 3,3 V</text>
+<rect x="40" y="280" width="300" height="100" rx="13" fill="#e1f2fa" stroke="#b6c9d7"/>
+<text x="58" y="311" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">AM2302 / DHT22</text>
+<text x="58" y="338" font-family="Arial" font-size="16" fill="#304e65">DATA: GPIO13 · 3,3 V</text>
+<text x="58" y="361" font-family="Arial" font-size="16" fill="#304e65">Pull-up: około 4,6 kΩ</text>
+<rect x="40" y="435" width="300" height="100" rx="13" fill="#e9e2fa" stroke="#b6c9d7"/>
+<text x="58" y="466" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">OLED SH1106 128 × 64</text>
+<text x="58" y="493" font-family="Arial" font-size="16" fill="#304e65">I²C · zasilanie 3,3 V</text>
+<text x="58" y="516" font-family="Arial" font-size="16" fill="#304e65">Ekran lokalny</text>
+<rect x="40" y="590" width="300" height="115" rx="13" fill="#e1f2fa" stroke="#b6c9d7"/>
+<text x="58" y="621" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">2 × ADS1115</text>
+<text x="58" y="648" font-family="Arial" font-size="16" fill="#304e65">I²C 0x48 / 0x49 · 3,3 V</text>
+<text x="58" y="671" font-family="Arial" font-size="16" fill="#304e65">8 × wejście analogowe A0–A3</text>
+<text x="58" y="694" font-family="Arial" font-size="16" fill="#304e65">Wyniki w mV</text>
+<rect x="480" y="285" width="280" height="175" rx="13" fill="#d9f3eb" stroke="#b6c9d7"/>
+<text x="498" y="316" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">ESP32-WROOM-32</text>
+<text x="498" y="343" font-family="Arial" font-size="16" fill="#304e65">Odczyt i diagnostyka</text>
+<text x="498" y="366" font-family="Arial" font-size="16" fill="#304e65">CanHubProtocol v3</text>
+<text x="498" y="389" font-family="Arial" font-size="16" fill="#304e65">Heartbeat co 1 s</text>
+<text x="498" y="412" font-family="Arial" font-size="16" fill="#304e65">Pomiary co 2,5 s</text>
+<rect x="890" y="165" width="270" height="130" rx="13" fill="#fff0cb" stroke="#b6c9d7"/>
+<text x="908" y="196" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">TXS0108E</text>
+<text x="908" y="223" font-family="Arial" font-size="16" fill="#304e65">VA 3,3 V · VB 5 V</text>
+<text x="908" y="246" font-family="Arial" font-size="16" fill="#304e65">OE: GPIO25, 10 kΩ do GND</text>
+<text x="908" y="269" font-family="Arial" font-size="16" fill="#304e65">Dopasowanie poziomów</text>
+<rect x="890" y="410" width="270" height="110" rx="13" fill="#fff0cb" stroke="#b6c9d7"/>
+<text x="908" y="441" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">Moduł MCP2515</text>
+<text x="908" y="468" font-family="Arial" font-size="16" fill="#304e65">Zasilanie 5 V · kwarc 8 MHz</text>
+<text x="908" y="491" font-family="Arial" font-size="16" fill="#304e65">CAN 125 kbit/s</text>
+<rect x="890" y="620" width="270" height="85" rx="13" fill="#d9f3eb" stroke="#b6c9d7"/>
+<text x="908" y="651" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">Do CAN HUB-a</text>
+<text x="908" y="678" font-family="Arial" font-size="16" fill="#304e65">CAN H / CAN L + GND</text>
+<text x="40" y="752" font-family="Arial" font-size="16" fill="#496277">Wszystkie moduły mają wspólną masę. SPI: SCK18, MOSI23, MISO19, CS27; INT26.</text>
+<text x="40" y="776" font-family="Arial" font-size="16" fill="#496277">ADS: ADDR nr 1 → GND; ADDR nr 2 → 3,3 V. OLED oraz ADS współdzielą SDA21 / SCL22.</text>
+</svg>

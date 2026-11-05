@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="610" viewBox="0 0 1200 610">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8" fill="none" stroke="#4b6d88" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="100%" rx="18" fill="#f1f5f9"/>
+<text x="40" y="47" font-family="Arial" font-size="27" font-weight="bold" fill="#102e45">CAN HUB · architektura połączeń</text>
+<text x="40" y="78" font-family="Arial" font-size="17" fill="#496277">Schemat funkcjonalny — dwie magistrale CAN i oddzielny interfejs panelu HMI</text>
+<path d="M300 195 L410 245" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="303" y="173" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">CAN H / CAN L</text>
+<path d="M300 365 L410 305" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="303" y="391" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">CAN H / CAN L</text>
+<path d="M580 340 L580 400" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="600" y="378" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">SPI0</text>
+<path d="M750 455 L895 455" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="776" y="438" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">Ethernet</text>
+<path d="M750 410 L895 250" stroke="#4b6d88" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="812" y="321" font-family="Arial" font-size="15" fill="#304e65" paint-order="stroke" stroke="#f1f5f9" stroke-width="5">SPI1</text>
+<rect x="40" y="140" width="260" height="110" rx="13" fill="#e1f2fa" stroke="#b6c9d7"/>
+<text x="58" y="171" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">Moduły ESP32</text>
+<text x="58" y="198" font-family="Arial" font-size="16" fill="#304e65">Czujniki + kontrolery CAN</text>
+<text x="58" y="221" font-family="Arial" font-size="16" fill="#304e65">Magistrala CAN0</text>
+<rect x="40" y="310" width="260" height="110" rx="13" fill="#e1f2fa" stroke="#b6c9d7"/>
+<text x="58" y="341" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">Moduły ESP32</text>
+<text x="58" y="368" font-family="Arial" font-size="16" fill="#304e65">Np. moduł szklarni</text>
+<text x="58" y="391" font-family="Arial" font-size="16" fill="#304e65">Magistrala CAN1</text>
+<rect x="410" y="210" width="340" height="130" rx="13" fill="#d9f3eb" stroke="#b6c9d7"/>
+<text x="428" y="241" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">Waveshare 2-CH CAN HAT</text>
+<text x="428" y="268" font-family="Arial" font-size="16" fill="#304e65">2 × MCP2515</text>
+<text x="428" y="291" font-family="Arial" font-size="16" fill="#304e65">CAN0 / canhat0 · CAN1 / canhat1</text>
+<rect x="410" y="400" width="340" height="110" rx="13" fill="#d9f3eb" stroke="#b6c9d7"/>
+<text x="428" y="431" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">Raspberry Pi 5</text>
+<text x="428" y="458" font-family="Arial" font-size="16" fill="#304e65">Debian Trixie · usługi CAN HUB</text>
+<text x="428" y="481" font-family="Arial" font-size="16" fill="#304e65">Serwer Modbus TCP + WWW</text>
+<rect x="895" y="400" width="265" height="110" rx="13" fill="#fff0cb" stroke="#b6c9d7"/>
+<text x="913" y="431" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">Weintek HMI</text>
+<text x="913" y="458" font-family="Arial" font-size="16" fill="#304e65">Modbus TCP · odczyt FC03</text>
+<text x="913" y="481" font-family="Arial" font-size="16" fill="#304e65">Pomiary, statusy, trendy</text>
+<rect x="895" y="140" width="265" height="110" rx="13" fill="#e9e2fa" stroke="#b6c9d7"/>
+<text x="913" y="171" font-family="Arial" font-weight="bold" font-size="20" fill="#102e45">ILI9341 TFT</text>
+<text x="913" y="198" font-family="Arial" font-size="16" fill="#304e65">Lokalny ekran HUB-a</text>
+<text x="913" y="221" font-family="Arial" font-size="16" fill="#304e65">Pomiary i diagnostyka</text>
+<text x="40" y="562" font-family="Arial" font-size="16" fill="#496277">CAN: skręcona para i terminacja 120 Ω na obu końcach każdej magistrali.</text>
+<text x="40" y="586" font-family="Arial" font-size="16" fill="#496277">Schemat pomija przewody zasilania i GND. Administracyjny dostęp do WWW wymaga zaplanowanej łączności IP.</text>
+</svg>

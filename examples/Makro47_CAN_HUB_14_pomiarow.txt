@@ -1,0 +1,1138 @@
+// zbudowane przez Codex
+// Odczyt 14 pomiarow (6 temperatury/wilgotnosci + 8 analogowych mV) CAN HUB po Modbusie do pamieci lokalnej HMI.
+// Kontrola lacznosci, zerowanie przy braku HUB-a i priorytety komunikatow Word Lamp.
+// MAKRO 47 - CAN_HUB_odczyt - 14 POZYCJI
+// Wklej CALY plik zamiast poprzedniej tresci makra.
+// Wykonywanie cykliczne: 10 x 100 ms = 1 sekunda (nie 10 sekund).
+// Urzadzenia w projekcie: CAN_HUB (Modbus), Weintek (pamiec lokalna).
+// Pozycja | wartosc/status/wiek | Word Lamp
+// 1 | LW700/LW701/LW702 | LW724
+// 2 | LW703/LW704/LW705 | LW725
+// 3 | LW706/LW707/LW708 | LW726
+// 4 | LW709/LW710/LW711 | LW727
+// 5 | LW712/LW713/LW714 | LW728
+// 6 | LW715/LW716/LW717 | LW729
+// Word Lamp kopiuje 16 stanow z pierwszej kontrolki.
+// Nie wpisuj maski bitowej bezposrednio jako numeru stanu Word Lamp.
+// Kolejne warunki nadpisuja poprzedni wynik: ostatni pasujacy wygrywa.
+// Brak HUB-a ma pierwszenstwo nad WSZYSTKIMI stanami czujnikow.
+// Komentarze bez polskich znakow dla zgodnosci edytora EasyBuilder.
+
+macro_command main()
+// 14 pozycji x (wartosc, status bitowy, wiek) = 42 slow.
+short data[42]
+short header[2]
+short previous
+short repeated
+short seen
+short state
+short err
+short s1Lamp
+short s1Bits
+short s2Lamp
+short s2Bits
+short s3Lamp
+short s3Bits
+short s4Lamp
+short s4Bits
+short s5Lamp
+short s5Bits
+short s6Lamp
+short s6Bits
+short a1Lamp
+short a1Bits
+short a2Lamp
+short a2Bits
+short a3Lamp
+short a3Bits
+short a4Lamp
+short a4Bits
+short a5Lamp
+short a5Bits
+short a6Lamp
+short a6Bits
+short a7Lamp
+short a7Bits
+short a8Lamp
+short a8Bits
+bool valid
+bool connected
+// Wyzeruj bufor przed kazdym odczytem.
+FILL(data[0], 0, 42)
+FILL(header[0], 0, 2)
+valid = true
+connected = false
+state = 2
+// Pamiec kontroli zycia HUB-a pomiedzy wywolaniami makra.
+GetData(previous, "Weintek", LW, 720, 1)
+GetData(repeated, "Weintek", LW, 721, 1)
+GetData(seen, "Weintek", LW, 722, 1)
+// Rejestr 0: wersja 2. Rejestr 1: zmieniajacy sie licznik HUB-a.
+GetDataEx(header[0], "CAN_HUB", 4x, 0, 2)
+GetError(err)
+if err <> 0 then
+    valid = false
+end if
+if header[0] <> 2 then
+    valid = false
+end if
+// Odczytaj rejestry Modbus 100..141. Nie zmieniaj ich kolejnosci.
+GetDataEx(data[0], "CAN_HUB", 4x, 100, 42)
+GetError(err)
+if err <> 0 then
+    valid = false
+end if
+// LW723: 0=oczekiwanie, 1=OK, 2=blad odczytu/wersji, 3=licznik stoi.
+if valid == true then
+    if seen == 0 then
+        seen = 1
+        repeated = 0
+        state = 0
+    else
+        if header[1] == previous then
+            repeated = repeated + 1
+        else
+            repeated = 0
+        end if
+        // 4 powtorzenia licznika: brak zycia HUB-a. Okres makra: 1 s.
+        if repeated >= 4 then
+            repeated = 4
+            state = 3
+        else
+            state = 1
+            connected = true
+        end if
+    end if
+    previous = header[1]
+else
+    seen = 0
+    repeated = 0
+    state = 2
+end if
+// Zachowane zachowanie braku HUB-a: wartosc=0, status lokalny=11, wiek=65535.
+// UWAGA: 11 w tych polach jest starym lokalnym znacznikiem, NIE maska CAN.
+// Przy connected=false NIE analizujemy tego statusu jako bitow czujnika.
+if connected == false then
+    data[0] = 0
+    data[1] = 11
+    data[2] = -1
+    data[3] = 0
+    data[4] = 11
+    data[5] = -1
+    data[6] = 0
+    data[7] = 11
+    data[8] = -1
+    data[9] = 0
+    data[10] = 11
+    data[11] = -1
+    data[12] = 0
+    data[13] = 11
+    data[14] = -1
+    data[15] = 0
+    data[16] = 11
+    data[17] = -1
+    data[18] = 0
+    data[19] = 11
+    data[20] = -1
+    data[21] = 0
+    data[22] = 11
+    data[23] = -1
+    data[24] = 0
+    data[25] = 11
+    data[26] = -1
+    data[27] = 0
+    data[28] = 11
+    data[29] = -1
+    data[30] = 0
+    data[31] = 11
+    data[32] = -1
+    data[33] = 0
+    data[34] = 11
+    data[35] = -1
+    data[36] = 0
+    data[37] = 11
+    data[38] = -1
+    data[39] = 0
+    data[40] = 11
+    data[41] = -1
+
+end if
+
+// ===== POZYCJA 1: status LW701, komunikat LW724 =====
+s1Lamp = 11
+if connected == true then
+    // Brak bitow statusu: OK. Nierozpoznany blad: stan 2.
+    s1Lamp = 1
+    if data[1] <> 0 then
+        s1Lamp = 2
+    end if
+    // Szczegoly bledu czujnika: CRC > timeout > inny blad.
+    // Pozostale komunikaty ponizej zachowuja wyzsze pierwszenstwo.
+    // Bit 15: inny blad.
+    s1Bits = data[1] & 32768
+    if s1Bits <> 0 then
+        s1Lamp = 15
+    end if
+    // Bit 7: timeout czujnika.
+    s1Bits = data[1] & 128
+    if s1Bits <> 0 then
+        s1Lamp = 13
+    end if
+    // Bit 8: blad CRC.
+    s1Bits = data[1] & 256
+    if s1Bits <> 0 then
+        s1Lamp = 14
+    end if
+    // Bit 5: pomiar niegotowy.
+    s1Bits = data[1] & 32
+    if s1Bits <> 0 then
+        s1Lamp = 10
+    end if
+    // Bity 6 lub 9: brak odpowiedzi / blad komunikacji czujnika.
+    s1Bits = data[1] & 576
+    if s1Bits <> 0 then
+        s1Lamp = 8
+    end if
+    // Bit 10: bledny format danych.
+    s1Bits = data[1] & 1024
+    if s1Bits <> 0 then
+        s1Lamp = 4
+    end if
+    // Bity 11, 12 lub 14: zakres / przepelnienie / nasycenie ADC.
+    s1Bits = data[1] & 22528
+    if s1Bits <> 0 then
+        s1Lamp = 6
+    end if
+    // Bit 13: blad konfiguracji.
+    s1Bits = data[1] & 8192
+    if s1Bits <> 0 then
+        s1Lamp = 5
+    end if
+    // Bit 4: brak aktualnej diagnostyki pasujacej do pomiaru.
+    s1Bits = data[1] & 16
+    if s1Bits <> 0 then
+        s1Lamp = 7
+    end if
+    // Bit 3: brak swiezego pomiaru.
+    s1Bits = data[1] & 8
+    if s1Bits <> 0 then
+        s1Lamp = 3
+    end if
+    // Bit 1: brak heartbeat modulu ESP32 (wykrywa CAN HUB).
+    s1Bits = data[1] & 2
+    if s1Bits <> 0 then
+        s1Lamp = 9
+    end if
+    // Bit 2: pomiar wylaczony przez uzytkownika - najwyzszy priorytet przy lacznosci z HUB-em.
+    s1Bits = data[1] & 4
+    if s1Bits <> 0 then
+        s1Lamp = 12
+    end if
+else
+    if state == 0 then
+        s1Lamp = 0
+    end if
+end if
+
+// ===== POZYCJA 2: status LW704, komunikat LW725 =====
+s2Lamp = 11
+if connected == true then
+    // Brak bitow statusu: OK. Nierozpoznany blad: stan 2.
+    s2Lamp = 1
+    if data[4] <> 0 then
+        s2Lamp = 2
+    end if
+    // Szczegoly bledu czujnika: CRC > timeout > inny blad.
+    // Pozostale komunikaty ponizej zachowuja wyzsze pierwszenstwo.
+    // Bit 15: inny blad.
+    s2Bits = data[4] & 32768
+    if s2Bits <> 0 then
+        s2Lamp = 15
+    end if
+    // Bit 7: timeout czujnika.
+    s2Bits = data[4] & 128
+    if s2Bits <> 0 then
+        s2Lamp = 13
+    end if
+    // Bit 8: blad CRC.
+    s2Bits = data[4] & 256
+    if s2Bits <> 0 then
+        s2Lamp = 14
+    end if
+    // Bit 5: pomiar niegotowy.
+    s2Bits = data[4] & 32
+    if s2Bits <> 0 then
+        s2Lamp = 10
+    end if
+    // Bity 6 lub 9: brak odpowiedzi / blad komunikacji czujnika.
+    s2Bits = data[4] & 576
+    if s2Bits <> 0 then
+        s2Lamp = 8
+    end if
+    // Bit 10: bledny format danych.
+    s2Bits = data[4] & 1024
+    if s2Bits <> 0 then
+        s2Lamp = 4
+    end if
+    // Bity 11, 12 lub 14: zakres / przepelnienie / nasycenie ADC.
+    s2Bits = data[4] & 22528
+    if s2Bits <> 0 then
+        s2Lamp = 6
+    end if
+    // Bit 13: blad konfiguracji.
+    s2Bits = data[4] & 8192
+    if s2Bits <> 0 then
+        s2Lamp = 5
+    end if
+    // Bit 4: brak aktualnej diagnostyki pasujacej do pomiaru.
+    s2Bits = data[4] & 16
+    if s2Bits <> 0 then
+        s2Lamp = 7
+    end if
+    // Bit 3: brak swiezego pomiaru.
+    s2Bits = data[4] & 8
+    if s2Bits <> 0 then
+        s2Lamp = 3
+    end if
+    // Bit 1: brak heartbeat modulu ESP32 (wykrywa CAN HUB).
+    s2Bits = data[4] & 2
+    if s2Bits <> 0 then
+        s2Lamp = 9
+    end if
+    // Bit 2: pomiar wylaczony przez uzytkownika - najwyzszy priorytet przy lacznosci z HUB-em.
+    s2Bits = data[4] & 4
+    if s2Bits <> 0 then
+        s2Lamp = 12
+    end if
+else
+    if state == 0 then
+        s2Lamp = 0
+    end if
+end if
+
+// ===== POZYCJA 3: status LW707, komunikat LW726 =====
+s3Lamp = 11
+if connected == true then
+    // Brak bitow statusu: OK. Nierozpoznany blad: stan 2.
+    s3Lamp = 1
+    if data[7] <> 0 then
+        s3Lamp = 2
+    end if
+    // Szczegoly bledu czujnika: CRC > timeout > inny blad.
+    // Pozostale komunikaty ponizej zachowuja wyzsze pierwszenstwo.
+    // Bit 15: inny blad.
+    s3Bits = data[7] & 32768
+    if s3Bits <> 0 then
+        s3Lamp = 15
+    end if
+    // Bit 7: timeout czujnika.
+    s3Bits = data[7] & 128
+    if s3Bits <> 0 then
+        s3Lamp = 13
+    end if
+    // Bit 8: blad CRC.
+    s3Bits = data[7] & 256
+    if s3Bits <> 0 then
+        s3Lamp = 14
+    end if
+    // Bit 5: pomiar niegotowy.
+    s3Bits = data[7] & 32
+    if s3Bits <> 0 then
+        s3Lamp = 10
+    end if
+    // Bity 6 lub 9: brak odpowiedzi / blad komunikacji czujnika.
+    s3Bits = data[7] & 576
+    if s3Bits <> 0 then
+        s3Lamp = 8
+    end if
+    // Bit 10: bledny format danych.
+    s3Bits = data[7] & 1024
+    if s3Bits <> 0 then
+        s3Lamp = 4
+    end if
+    // Bity 11, 12 lub 14: zakres / przepelnienie / nasycenie ADC.
+    s3Bits = data[7] & 22528
+    if s3Bits <> 0 then
+        s3Lamp = 6
+    end if
+    // Bit 13: blad konfiguracji.
+    s3Bits = data[7] & 8192
+    if s3Bits <> 0 then
+        s3Lamp = 5
+    end if
+    // Bit 4: brak aktualnej diagnostyki pasujacej do pomiaru.
+    s3Bits = data[7] & 16
+    if s3Bits <> 0 then
+        s3Lamp = 7
+    end if
+    // Bit 3: brak swiezego pomiaru.
+    s3Bits = data[7] & 8
+    if s3Bits <> 0 then
+        s3Lamp = 3
+    end if
+    // Bit 1: brak heartbeat modulu ESP32 (wykrywa CAN HUB).
+    s3Bits = data[7] & 2
+    if s3Bits <> 0 then
+        s3Lamp = 9
+    end if
+    // Bit 2: pomiar wylaczony przez uzytkownika - najwyzszy priorytet przy lacznosci z HUB-em.
+    s3Bits = data[7] & 4
+    if s3Bits <> 0 then
+        s3Lamp = 12
+    end if
+else
+    if state == 0 then
+        s3Lamp = 0
+    end if
+end if
+
+// ===== POZYCJA 4: status LW710, komunikat LW727 =====
+s4Lamp = 11
+if connected == true then
+    // Brak bitow statusu: OK. Nierozpoznany blad: stan 2.
+    s4Lamp = 1
+    if data[10] <> 0 then
+        s4Lamp = 2
+    end if
+    // Szczegoly bledu czujnika: CRC > timeout > inny blad.
+    // Pozostale komunikaty ponizej zachowuja wyzsze pierwszenstwo.
+    // Bit 15: inny blad.
+    s4Bits = data[10] & 32768
+    if s4Bits <> 0 then
+        s4Lamp = 15
+    end if
+    // Bit 7: timeout czujnika.
+    s4Bits = data[10] & 128
+    if s4Bits <> 0 then
+        s4Lamp = 13
+    end if
+    // Bit 8: blad CRC.
+    s4Bits = data[10] & 256
+    if s4Bits <> 0 then
+        s4Lamp = 14
+    end if
+    // Bit 5: pomiar niegotowy.
+    s4Bits = data[10] & 32
+    if s4Bits <> 0 then
+        s4Lamp = 10
+    end if
+    // Bity 6 lub 9: brak odpowiedzi / blad komunikacji czujnika.
+    s4Bits = data[10] & 576
+    if s4Bits <> 0 then
+        s4Lamp = 8
+    end if
+    // Bit 10: bledny format danych.
+    s4Bits = data[10] & 1024
+    if s4Bits <> 0 then
+        s4Lamp = 4
+    end if
+    // Bity 11, 12 lub 14: zakres / przepelnienie / nasycenie ADC.
+    s4Bits = data[10] & 22528
+    if s4Bits <> 0 then
+        s4Lamp = 6
+    end if
+    // Bit 13: blad konfiguracji.
+    s4Bits = data[10] & 8192
+    if s4Bits <> 0 then
+        s4Lamp = 5
+    end if
+    // Bit 4: brak aktualnej diagnostyki pasujacej do pomiaru.
+    s4Bits = data[10] & 16
+    if s4Bits <> 0 then
+        s4Lamp = 7
+    end if
+    // Bit 3: brak swiezego pomiaru.
+    s4Bits = data[10] & 8
+    if s4Bits <> 0 then
+        s4Lamp = 3
+    end if
+    // Bit 1: brak heartbeat modulu ESP32 (wykrywa CAN HUB).
+    s4Bits = data[10] & 2
+    if s4Bits <> 0 then
+        s4Lamp = 9
+    end if
+    // Bit 2: pomiar wylaczony przez uzytkownika - najwyzszy priorytet przy lacznosci z HUB-em.
+    s4Bits = data[10] & 4
+    if s4Bits <> 0 then
+        s4Lamp = 12
+    end if
+else
+    if state == 0 then
+        s4Lamp = 0
+    end if
+end if
+
+// ===== POZYCJA 5: status LW713, komunikat LW728 =====
+s5Lamp = 11
+if connected == true then
+    // Brak bitow statusu: OK. Nierozpoznany blad: stan 2.
+    s5Lamp = 1
+    if data[13] <> 0 then
+        s5Lamp = 2
+    end if
+    // Szczegoly bledu czujnika: CRC > timeout > inny blad.
+    // Pozostale komunikaty ponizej zachowuja wyzsze pierwszenstwo.
+    // Bit 15: inny blad.
+    s5Bits = data[13] & 32768
+    if s5Bits <> 0 then
+        s5Lamp = 15
+    end if
+    // Bit 7: timeout czujnika.
+    s5Bits = data[13] & 128
+    if s5Bits <> 0 then
+        s5Lamp = 13
+    end if
+    // Bit 8: blad CRC.
+    s5Bits = data[13] & 256
+    if s5Bits <> 0 then
+        s5Lamp = 14
+    end if
+    // Bit 5: pomiar niegotowy.
+    s5Bits = data[13] & 32
+    if s5Bits <> 0 then
+        s5Lamp = 10
+    end if
+    // Bity 6 lub 9: brak odpowiedzi / blad komunikacji czujnika.
+    s5Bits = data[13] & 576
+    if s5Bits <> 0 then
+        s5Lamp = 8
+    end if
+    // Bit 10: bledny format danych.
+    s5Bits = data[13] & 1024
+    if s5Bits <> 0 then
+        s5Lamp = 4
+    end if
+    // Bity 11, 12 lub 14: zakres / przepelnienie / nasycenie ADC.
+    s5Bits = data[13] & 22528
+    if s5Bits <> 0 then
+        s5Lamp = 6
+    end if
+    // Bit 13: blad konfiguracji.
+    s5Bits = data[13] & 8192
+    if s5Bits <> 0 then
+        s5Lamp = 5
+    end if
+    // Bit 4: brak aktualnej diagnostyki pasujacej do pomiaru.
+    s5Bits = data[13] & 16
+    if s5Bits <> 0 then
+        s5Lamp = 7
+    end if
+    // Bit 3: brak swiezego pomiaru.
+    s5Bits = data[13] & 8
+    if s5Bits <> 0 then
+        s5Lamp = 3
+    end if
+    // Bit 1: brak heartbeat modulu ESP32 (wykrywa CAN HUB).
+    s5Bits = data[13] & 2
+    if s5Bits <> 0 then
+        s5Lamp = 9
+    end if
+    // Bit 2: pomiar wylaczony przez uzytkownika - najwyzszy priorytet przy lacznosci z HUB-em.
+    s5Bits = data[13] & 4
+    if s5Bits <> 0 then
+        s5Lamp = 12
+    end if
+else
+    if state == 0 then
+        s5Lamp = 0
+    end if
+end if
+
+// ===== POZYCJA 6: status LW716, komunikat LW729 =====
+s6Lamp = 11
+if connected == true then
+    // Brak bitow statusu: OK. Nierozpoznany blad: stan 2.
+    s6Lamp = 1
+    if data[16] <> 0 then
+        s6Lamp = 2
+    end if
+    // Szczegoly bledu czujnika: CRC > timeout > inny blad.
+    // Pozostale komunikaty ponizej zachowuja wyzsze pierwszenstwo.
+    // Bit 15: inny blad.
+    s6Bits = data[16] & 32768
+    if s6Bits <> 0 then
+        s6Lamp = 15
+    end if
+    // Bit 7: timeout czujnika.
+    s6Bits = data[16] & 128
+    if s6Bits <> 0 then
+        s6Lamp = 13
+    end if
+    // Bit 8: blad CRC.
+    s6Bits = data[16] & 256
+    if s6Bits <> 0 then
+        s6Lamp = 14
+    end if
+    // Bit 5: pomiar niegotowy.
+    s6Bits = data[16] & 32
+    if s6Bits <> 0 then
+        s6Lamp = 10
+    end if
+    // Bity 6 lub 9: brak odpowiedzi / blad komunikacji czujnika.
+    s6Bits = data[16] & 576
+    if s6Bits <> 0 then
+        s6Lamp = 8
+    end if
+    // Bit 10: bledny format danych.
+    s6Bits = data[16] & 1024
+    if s6Bits <> 0 then
+        s6Lamp = 4
+    end if
+    // Bity 11, 12 lub 14: zakres / przepelnienie / nasycenie ADC.
+    s6Bits = data[16] & 22528
+    if s6Bits <> 0 then
+        s6Lamp = 6
+    end if
+    // Bit 13: blad konfiguracji.
+    s6Bits = data[16] & 8192
+    if s6Bits <> 0 then
+        s6Lamp = 5
+    end if
+    // Bit 4: brak aktualnej diagnostyki pasujacej do pomiaru.
+    s6Bits = data[16] & 16
+    if s6Bits <> 0 then
+        s6Lamp = 7
+    end if
+    // Bit 3: brak swiezego pomiaru.
+    s6Bits = data[16] & 8
+    if s6Bits <> 0 then
+        s6Lamp = 3
+    end if
+    // Bit 1: brak heartbeat modulu ESP32 (wykrywa CAN HUB).
+    s6Bits = data[16] & 2
+    if s6Bits <> 0 then
+        s6Lamp = 9
+    end if
+    // Bit 2: pomiar wylaczony przez uzytkownika - najwyzszy priorytet przy lacznosci z HUB-em.
+    s6Bits = data[16] & 4
+    if s6Bits <> 0 then
+        s6Lamp = 12
+    end if
+else
+    if state == 0 then
+        s6Lamp = 0
+    end if
+end if
+
+// ANALOG 1..8: ten sam priorytet komunikatow; wartosci w mV.
+// Analog 1: Modbus 118..120, LW800..803.
+a1Lamp = 11
+if connected == true then
+    a1Lamp = 1
+    if data[19] <> 0 then
+        a1Lamp = 2
+    end if
+    a1Bits = data[19] & 32768
+    if a1Bits <> 0 then
+        a1Lamp = 15
+    end if
+    a1Bits = data[19] & 128
+    if a1Bits <> 0 then
+        a1Lamp = 13
+    end if
+    a1Bits = data[19] & 256
+    if a1Bits <> 0 then
+        a1Lamp = 14
+    end if
+    a1Bits = data[19] & 32
+    if a1Bits <> 0 then
+        a1Lamp = 10
+    end if
+    a1Bits = data[19] & 576
+    if a1Bits <> 0 then
+        a1Lamp = 8
+    end if
+    a1Bits = data[19] & 1024
+    if a1Bits <> 0 then
+        a1Lamp = 4
+    end if
+    a1Bits = data[19] & 22528
+    if a1Bits <> 0 then
+        a1Lamp = 6
+    end if
+    a1Bits = data[19] & 8192
+    if a1Bits <> 0 then
+        a1Lamp = 5
+    end if
+    a1Bits = data[19] & 16
+    if a1Bits <> 0 then
+        a1Lamp = 7
+    end if
+    a1Bits = data[19] & 8
+    if a1Bits <> 0 then
+        a1Lamp = 3
+    end if
+    a1Bits = data[19] & 2
+    if a1Bits <> 0 then
+        a1Lamp = 9
+    end if
+    a1Bits = data[19] & 4
+    if a1Bits <> 0 then
+        a1Lamp = 12
+    end if
+else
+    if state == 0 then
+        a1Lamp = 0
+    end if
+end if
+
+SetData(data[18], "Weintek", LW, 800, 3)
+SetData(a1Lamp, "Weintek", LW, 803, 1)
+// Analog 2: Modbus 121..123, LW804..807.
+a2Lamp = 11
+if connected == true then
+    a2Lamp = 1
+    if data[22] <> 0 then
+        a2Lamp = 2
+    end if
+    a2Bits = data[22] & 32768
+    if a2Bits <> 0 then
+        a2Lamp = 15
+    end if
+    a2Bits = data[22] & 128
+    if a2Bits <> 0 then
+        a2Lamp = 13
+    end if
+    a2Bits = data[22] & 256
+    if a2Bits <> 0 then
+        a2Lamp = 14
+    end if
+    a2Bits = data[22] & 32
+    if a2Bits <> 0 then
+        a2Lamp = 10
+    end if
+    a2Bits = data[22] & 576
+    if a2Bits <> 0 then
+        a2Lamp = 8
+    end if
+    a2Bits = data[22] & 1024
+    if a2Bits <> 0 then
+        a2Lamp = 4
+    end if
+    a2Bits = data[22] & 22528
+    if a2Bits <> 0 then
+        a2Lamp = 6
+    end if
+    a2Bits = data[22] & 8192
+    if a2Bits <> 0 then
+        a2Lamp = 5
+    end if
+    a2Bits = data[22] & 16
+    if a2Bits <> 0 then
+        a2Lamp = 7
+    end if
+    a2Bits = data[22] & 8
+    if a2Bits <> 0 then
+        a2Lamp = 3
+    end if
+    a2Bits = data[22] & 2
+    if a2Bits <> 0 then
+        a2Lamp = 9
+    end if
+    a2Bits = data[22] & 4
+    if a2Bits <> 0 then
+        a2Lamp = 12
+    end if
+else
+    if state == 0 then
+        a2Lamp = 0
+    end if
+end if
+
+SetData(data[21], "Weintek", LW, 804, 3)
+SetData(a2Lamp, "Weintek", LW, 807, 1)
+// Analog 3: Modbus 124..126, LW808..811.
+a3Lamp = 11
+if connected == true then
+    a3Lamp = 1
+    if data[25] <> 0 then
+        a3Lamp = 2
+    end if
+    a3Bits = data[25] & 32768
+    if a3Bits <> 0 then
+        a3Lamp = 15
+    end if
+    a3Bits = data[25] & 128
+    if a3Bits <> 0 then
+        a3Lamp = 13
+    end if
+    a3Bits = data[25] & 256
+    if a3Bits <> 0 then
+        a3Lamp = 14
+    end if
+    a3Bits = data[25] & 32
+    if a3Bits <> 0 then
+        a3Lamp = 10
+    end if
+    a3Bits = data[25] & 576
+    if a3Bits <> 0 then
+        a3Lamp = 8
+    end if
+    a3Bits = data[25] & 1024
+    if a3Bits <> 0 then
+        a3Lamp = 4
+    end if
+    a3Bits = data[25] & 22528
+    if a3Bits <> 0 then
+        a3Lamp = 6
+    end if
+    a3Bits = data[25] & 8192
+    if a3Bits <> 0 then
+        a3Lamp = 5
+    end if
+    a3Bits = data[25] & 16
+    if a3Bits <> 0 then
+        a3Lamp = 7
+    end if
+    a3Bits = data[25] & 8
+    if a3Bits <> 0 then
+        a3Lamp = 3
+    end if
+    a3Bits = data[25] & 2
+    if a3Bits <> 0 then
+        a3Lamp = 9
+    end if
+    a3Bits = data[25] & 4
+    if a3Bits <> 0 then
+        a3Lamp = 12
+    end if
+else
+    if state == 0 then
+        a3Lamp = 0
+    end if
+end if
+
+SetData(data[24], "Weintek", LW, 808, 3)
+SetData(a3Lamp, "Weintek", LW, 811, 1)
+// Analog 4: Modbus 127..129, LW812..815.
+a4Lamp = 11
+if connected == true then
+    a4Lamp = 1
+    if data[28] <> 0 then
+        a4Lamp = 2
+    end if
+    a4Bits = data[28] & 32768
+    if a4Bits <> 0 then
+        a4Lamp = 15
+    end if
+    a4Bits = data[28] & 128
+    if a4Bits <> 0 then
+        a4Lamp = 13
+    end if
+    a4Bits = data[28] & 256
+    if a4Bits <> 0 then
+        a4Lamp = 14
+    end if
+    a4Bits = data[28] & 32
+    if a4Bits <> 0 then
+        a4Lamp = 10
+    end if
+    a4Bits = data[28] & 576
+    if a4Bits <> 0 then
+        a4Lamp = 8
+    end if
+    a4Bits = data[28] & 1024
+    if a4Bits <> 0 then
+        a4Lamp = 4
+    end if
+    a4Bits = data[28] & 22528
+    if a4Bits <> 0 then
+        a4Lamp = 6
+    end if
+    a4Bits = data[28] & 8192
+    if a4Bits <> 0 then
+        a4Lamp = 5
+    end if
+    a4Bits = data[28] & 16
+    if a4Bits <> 0 then
+        a4Lamp = 7
+    end if
+    a4Bits = data[28] & 8
+    if a4Bits <> 0 then
+        a4Lamp = 3
+    end if
+    a4Bits = data[28] & 2
+    if a4Bits <> 0 then
+        a4Lamp = 9
+    end if
+    a4Bits = data[28] & 4
+    if a4Bits <> 0 then
+        a4Lamp = 12
+    end if
+else
+    if state == 0 then
+        a4Lamp = 0
+    end if
+end if
+
+SetData(data[27], "Weintek", LW, 812, 3)
+SetData(a4Lamp, "Weintek", LW, 815, 1)
+// Analog 5: Modbus 130..132, LW816..819.
+a5Lamp = 11
+if connected == true then
+    a5Lamp = 1
+    if data[31] <> 0 then
+        a5Lamp = 2
+    end if
+    a5Bits = data[31] & 32768
+    if a5Bits <> 0 then
+        a5Lamp = 15
+    end if
+    a5Bits = data[31] & 128
+    if a5Bits <> 0 then
+        a5Lamp = 13
+    end if
+    a5Bits = data[31] & 256
+    if a5Bits <> 0 then
+        a5Lamp = 14
+    end if
+    a5Bits = data[31] & 32
+    if a5Bits <> 0 then
+        a5Lamp = 10
+    end if
+    a5Bits = data[31] & 576
+    if a5Bits <> 0 then
+        a5Lamp = 8
+    end if
+    a5Bits = data[31] & 1024
+    if a5Bits <> 0 then
+        a5Lamp = 4
+    end if
+    a5Bits = data[31] & 22528
+    if a5Bits <> 0 then
+        a5Lamp = 6
+    end if
+    a5Bits = data[31] & 8192
+    if a5Bits <> 0 then
+        a5Lamp = 5
+    end if
+    a5Bits = data[31] & 16
+    if a5Bits <> 0 then
+        a5Lamp = 7
+    end if
+    a5Bits = data[31] & 8
+    if a5Bits <> 0 then
+        a5Lamp = 3
+    end if
+    a5Bits = data[31] & 2
+    if a5Bits <> 0 then
+        a5Lamp = 9
+    end if
+    a5Bits = data[31] & 4
+    if a5Bits <> 0 then
+        a5Lamp = 12
+    end if
+else
+    if state == 0 then
+        a5Lamp = 0
+    end if
+end if
+
+SetData(data[30], "Weintek", LW, 816, 3)
+SetData(a5Lamp, "Weintek", LW, 819, 1)
+// Analog 6: Modbus 133..135, LW820..823.
+a6Lamp = 11
+if connected == true then
+    a6Lamp = 1
+    if data[34] <> 0 then
+        a6Lamp = 2
+    end if
+    a6Bits = data[34] & 32768
+    if a6Bits <> 0 then
+        a6Lamp = 15
+    end if
+    a6Bits = data[34] & 128
+    if a6Bits <> 0 then
+        a6Lamp = 13
+    end if
+    a6Bits = data[34] & 256
+    if a6Bits <> 0 then
+        a6Lamp = 14
+    end if
+    a6Bits = data[34] & 32
+    if a6Bits <> 0 then
+        a6Lamp = 10
+    end if
+    a6Bits = data[34] & 576
+    if a6Bits <> 0 then
+        a6Lamp = 8
+    end if
+    a6Bits = data[34] & 1024
+    if a6Bits <> 0 then
+        a6Lamp = 4
+    end if
+    a6Bits = data[34] & 22528
+    if a6Bits <> 0 then
+        a6Lamp = 6
+    end if
+    a6Bits = data[34] & 8192
+    if a6Bits <> 0 then
+        a6Lamp = 5
+    end if
+    a6Bits = data[34] & 16
+    if a6Bits <> 0 then
+        a6Lamp = 7
+    end if
+    a6Bits = data[34] & 8
+    if a6Bits <> 0 then
+        a6Lamp = 3
+    end if
+    a6Bits = data[34] & 2
+    if a6Bits <> 0 then
+        a6Lamp = 9
+    end if
+    a6Bits = data[34] & 4
+    if a6Bits <> 0 then
+        a6Lamp = 12
+    end if
+else
+    if state == 0 then
+        a6Lamp = 0
+    end if
+end if
+
+SetData(data[33], "Weintek", LW, 820, 3)
+SetData(a6Lamp, "Weintek", LW, 823, 1)
+// Analog 7: Modbus 136..138, LW824..827.
+a7Lamp = 11
+if connected == true then
+    a7Lamp = 1
+    if data[37] <> 0 then
+        a7Lamp = 2
+    end if
+    a7Bits = data[37] & 32768
+    if a7Bits <> 0 then
+        a7Lamp = 15
+    end if
+    a7Bits = data[37] & 128
+    if a7Bits <> 0 then
+        a7Lamp = 13
+    end if
+    a7Bits = data[37] & 256
+    if a7Bits <> 0 then
+        a7Lamp = 14
+    end if
+    a7Bits = data[37] & 32
+    if a7Bits <> 0 then
+        a7Lamp = 10
+    end if
+    a7Bits = data[37] & 576
+    if a7Bits <> 0 then
+        a7Lamp = 8
+    end if
+    a7Bits = data[37] & 1024
+    if a7Bits <> 0 then
+        a7Lamp = 4
+    end if
+    a7Bits = data[37] & 22528
+    if a7Bits <> 0 then
+        a7Lamp = 6
+    end if
+    a7Bits = data[37] & 8192
+    if a7Bits <> 0 then
+        a7Lamp = 5
+    end if
+    a7Bits = data[37] & 16
+    if a7Bits <> 0 then
+        a7Lamp = 7
+    end if
+    a7Bits = data[37] & 8
+    if a7Bits <> 0 then
+        a7Lamp = 3
+    end if
+    a7Bits = data[37] & 2
+    if a7Bits <> 0 then
+        a7Lamp = 9
+    end if
+    a7Bits = data[37] & 4
+    if a7Bits <> 0 then
+        a7Lamp = 12
+    end if
+else
+    if state == 0 then
+        a7Lamp = 0
+    end if
+end if
+
+SetData(data[36], "Weintek", LW, 824, 3)
+SetData(a7Lamp, "Weintek", LW, 827, 1)
+// Analog 8: Modbus 139..141, LW828..831.
+a8Lamp = 11
+if connected == true then
+    a8Lamp = 1
+    if data[40] <> 0 then
+        a8Lamp = 2
+    end if
+    a8Bits = data[40] & 32768
+    if a8Bits <> 0 then
+        a8Lamp = 15
+    end if
+    a8Bits = data[40] & 128
+    if a8Bits <> 0 then
+        a8Lamp = 13
+    end if
+    a8Bits = data[40] & 256
+    if a8Bits <> 0 then
+        a8Lamp = 14
+    end if
+    a8Bits = data[40] & 32
+    if a8Bits <> 0 then
+        a8Lamp = 10
+    end if
+    a8Bits = data[40] & 576
+    if a8Bits <> 0 then
+        a8Lamp = 8
+    end if
+    a8Bits = data[40] & 1024
+    if a8Bits <> 0 then
+        a8Lamp = 4
+    end if
+    a8Bits = data[40] & 22528
+    if a8Bits <> 0 then
+        a8Lamp = 6
+    end if
+    a8Bits = data[40] & 8192
+    if a8Bits <> 0 then
+        a8Lamp = 5
+    end if
+    a8Bits = data[40] & 16
+    if a8Bits <> 0 then
+        a8Lamp = 7
+    end if
+    a8Bits = data[40] & 8
+    if a8Bits <> 0 then
+        a8Lamp = 3
+    end if
+    a8Bits = data[40] & 2
+    if a8Bits <> 0 then
+        a8Lamp = 9
+    end if
+    a8Bits = data[40] & 4
+    if a8Bits <> 0 then
+        a8Lamp = 12
+    end if
+else
+    if state == 0 then
+        a8Lamp = 0
+    end if
+end if
+
+SetData(data[39], "Weintek", LW, 828, 3)
+SetData(a8Lamp, "Weintek", LW, 831, 1)
+
+// Zapisz szesc niezaleznie wyliczonych numerow komunikatow.
+SetData(s1Lamp, "Weintek", LW, 724, 1)
+SetData(s2Lamp, "Weintek", LW, 725, 1)
+SetData(s3Lamp, "Weintek", LW, 726, 1)
+SetData(s4Lamp, "Weintek", LW, 727, 1)
+SetData(s5Lamp, "Weintek", LW, 728, 1)
+SetData(s6Lamp, "Weintek", LW, 729, 1)
+// Zapis wszystkich pomiarow oraz wspolnego stanu lacznosci.
+SetData(data[0], "Weintek", LW, 700, 18)
+SetData(previous, "Weintek", LW, 720, 1)
+SetData(repeated, "Weintek", LW, 721, 1)
+SetData(seen, "Weintek", LW, 722, 1)
+SetData(state, "Weintek", LW, 723, 1)
+SetData(connected, "Weintek", LB, 700, 1)
+end macro_command
+
