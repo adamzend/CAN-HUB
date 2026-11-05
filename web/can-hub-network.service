@@ -1,0 +1,7 @@
+[Unit]
+Description=CAN HUB save Ethernet configuration for next restart
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/can-hub/web/network_settings.py
+ProtectHome=true
+NoNewPrivileges=true

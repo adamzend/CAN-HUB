@@ -2,6 +2,8 @@
 
 [English](README.md) | **Polski**
 
+**Uruchomienie u siebie:** [instrukcja instalacji](docs/INSTALL.pl.md) · [firmware ESP32 i protokół](docs/FIRMWARE.en.md) · [testy źródeł](scripts/run_tests.py).
+
 CAN HUB łączy przewodową sieć modułów pomiarowych ESP32 z panelem operatorskim Weintek. Odbiera pomiary przez magistralę CAN, kontroluje ich poprawność i aktualność, a następnie udostępnia je przez Modbus TCP. Konfiguracja i diagnostyka są dostępne w przeglądarce, a najważniejsze informacje również na lokalnym wyświetlaczu.
 
 Opis przedstawia centralę CAN HUB oraz działający przykład jej zastosowania — moduł szklarni. Projekt nie jest wyłącznie koncepcją teoretyczną: stanowi rozbudowę domowej instalacji automatyki działającej od kilku lat. Zrzuty interfejsu zawierają **dane demonstracyjne**. Osobno zamieszczono dostarczony widok ekranu HMI oraz zdjęcie urządzenia w obudowie — pokazują stan w chwili wykonania, nie bieżące odczyty. Schematy blokowe przedstawiają połączenia i interfejsy; szczegółowy schemat elektryczny modułu szklarni znajduje się w końcowej części jego opisu.

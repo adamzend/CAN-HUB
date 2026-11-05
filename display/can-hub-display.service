@@ -1,0 +1,12 @@
+[Unit]
+Description=CAN HUB diagnostic LCD
+After=can-hub-web.service
+[Service]
+ExecStart=/usr/bin/python3 -u /opt/can-hub/display/diagnostic_lcd.py
+Restart=on-failure
+RestartSec=3
+RuntimeDirectory=can-hub-lcd
+RuntimeDirectoryMode=0755
+UMask=0022
+[Install]
+WantedBy=multi-user.target

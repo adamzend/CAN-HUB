@@ -1,0 +1,10 @@
+[Unit]
+Description=CAN HUB Waveshare dual MCP2515 interfaces at 125 kbit/s
+Requires=sys-subsystem-net-devices-canhat0.device sys-subsystem-net-devices-canhat1.device
+After=sys-subsystem-net-devices-canhat0.device sys-subsystem-net-devices-canhat1.device
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/can-hub-interfaces
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,30 @@
+[Unit]
+Description=CAN HUB optional SATEL integration worker
+After=network.target
+
+[Service]
+Type=simple
+User=canhub
+Group=canhub
+WorkingDirectory=/opt/can-hub/web
+Environment=CAN_HUB_DATA=/var/lib/can-hub-web
+Environment=SATEL_RUNTIME=/run/can-hub-satel
+ExecStart=/usr/bin/python3 -u /opt/can-hub/web/satel_worker.py
+Restart=on-failure
+RestartSec=5
+RuntimeDirectory=can-hub-satel
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
+StateDirectory=can-hub-web
+UMask=0077
+Nice=10
+CPUQuota=20%
+MemoryMax=128M
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+RestrictAddressFamilies=AF_INET AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

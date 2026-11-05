@@ -1,2 +1,15 @@
 Thumbs.db
 .DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+.pio/
+build/
+*.bin
+*.elf
+*.map
+account.json
+network-request
+power-request
+state/
+.env

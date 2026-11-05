@@ -1,0 +1,4 @@
+{
+  "modules": [],
+  "remote": {"protocol": "SFTP", "host": "", "port": 22, "username": "", "path": ""}
+}

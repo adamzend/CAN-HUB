@@ -1,0 +1,7 @@
+[Unit]
+Description=CAN HUB network change request
+[Path]
+PathExists=/var/lib/can-hub-web/network-request
+Unit=can-hub-network.service
+[Install]
+WantedBy=multi-user.target

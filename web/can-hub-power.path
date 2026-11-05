@@ -1,0 +1,6 @@
+[Unit]
+Description=Watch for authenticated CAN HUB power request
+[Path]
+PathExists=/var/lib/can-hub-web/power-request
+[Install]
+WantedBy=multi-user.target

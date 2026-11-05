@@ -1,0 +1,11 @@
+[Unit]
+Description=CAN HUB virtual test bus
+Before=can-hub-web.service
+[Service]
+Type=oneshot
+ExecStart=/sbin/modprobe vcan
+ExecStart=/bin/sh -c '/sbin/ip link show vcanhub >/dev/null 2>&1 || /sbin/ip link add dev vcanhub type vcan'
+ExecStart=/sbin/ip link set dev vcanhub up
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+[Unit]
+Description=CAN HUB fixed power operation
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/can-hub/web/power_request.py

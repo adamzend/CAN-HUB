@@ -2,6 +2,8 @@
 
 **English** | [Polski](README.pl.md)
 
+**Run it yourself:** [installation guide](docs/INSTALL.en.md) · [ESP32 firmware and protocol](docs/FIRMWARE.en.md) · [source tests](scripts/run_tests.py).
+
 CAN HUB connects a wired network of ESP32 measurement modules to a Weintek operator panel. It receives measurements over CAN, checks their validity and freshness, and makes them available over Modbus TCP. Configuration and diagnostics are accessible in a web browser, with essential information also shown on a local display.
 
 This overview introduces CAN HUB and a working application: the greenhouse module. The project is not merely a theoretical concept: it extends a home automation installation that has been operating for several years. The web interface screenshots contain **demonstration data**. The supplied HMI screenshot and photograph of the assembled device show their state at the time they were captured, rather than live readings. The original diagrams retain their Polish labels. Block diagrams show connections and interfaces; the detailed greenhouse wiring diagram appears near the end of the module description.

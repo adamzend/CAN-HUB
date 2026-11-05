@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+for interface in canhat0 canhat1; do
+    ip link set "$interface" down
+    ip link set "$interface" type can bitrate 125000 sample-point 0.875 restart-ms 1000 berr-reporting on loopback off
+    ip link set "$interface" txqueuelen 256
+    ip link set "$interface" up
+done

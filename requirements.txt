@@ -1,0 +1,7 @@
+# Versions matching the deployed Debian Trixie APIs. In particular, do not
+# upgrade pymodbus to 3.10+ without adapting ModbusSlaveContext and unit APIs.
+fastapi==0.115.11
+uvicorn==0.32.0
+pymodbus==3.8.6
+python-can>=4.3,<5
+Pillow==11.1.0
