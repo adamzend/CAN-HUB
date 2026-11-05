@@ -1,4 +1,4 @@
-# Source verification Ă˘â‚¬â€ť 5 November 2026
+# Source verification — 5 November 2026
 
 The publication copy was tested in an isolated temporary directory on a Raspberry Pi 5 running Debian Trixie. All **19 test suites passed**, including fresh startup/login, real loopback Modbus reads, protocol v2/v3, stale data and heartbeat handling, disabled signals, JSON backup imports, FTP/DTL processing, SATEL parsing and password reset with disposable test state.
 
@@ -17,8 +17,8 @@ bash -n scripts/install.sh scripts/enable-can.sh scripts/can-hub-interfaces
 
 Test state is disposable. Production credentials, device configuration and measurement archives are not included.
 
-GitHub Actions also passed all software suites on Ubuntu with Python 3.13 and the declared pip dependencies: [verification run](https://github.com/adamzend/CAN-HUB/actions/runs/42012365651).
+The published greenhouse sketch compiled with ESP32 Arduino core 3.3.2 (`esp32:esp32:esp32`): 336607 bytes flash, 22648 bytes static RAM. The ThreeValues example compiled with the same core and autowp-mcp2515 1.3.1: 289323 bytes flash, 20904 bytes static RAM. No USB upload was performed.
 
-The published greenhouse sketch compiled with ESP32 Arduino core 3.3.2 (`esp32:esp32:esp32`): 336607 bytes flash, 22648 bytes static RAM. This was compile-only; no device was programmed.
+The pip environment requires Pillow 13.0.0, replacing the reference system's older Pillow because GitHub reported upstream security advisories. GitHub Actions validates this updated environment. The OS installer uses Debian packages with distribution security updates instead of overwriting system Python with pip; keep Debian security updates enabled. Upstream version numbers alone do not establish the patch status of Debian packages.
 
-The published ThreeValues example also compiled with the same ESP32 core and autowp-mcp2515 1.3.1: 289323 bytes flash, 20904 bytes static RAM. No USB upload was performed.
+See [automated test results](https://github.com/adamzend/CAN-HUB/actions/workflows/tests.yml) for the current commit.
