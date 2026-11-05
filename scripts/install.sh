@@ -16,6 +16,8 @@ apt-get install -y python3 python3-fastapi python3-uvicorn python3-pymodbus pyth
 python3 "$ROOT/scripts/check_dependencies.py"
 systemctl is-active --quiet NetworkManager || { echo 'NetworkManager must already manage your Ethernet connection. Configure it before installing.'; exit 1; }
 id canhub >/dev/null 2>&1 || useradd --system --home-dir /var/lib/can-hub-web --shell /usr/sbin/nologin canhub
+restart_display=false
+if systemctl is-active --quiet can-hub-display.service; then restart_display=true; fi
 # Stop only this application's services during an update; never change HMI/ESP32.
 if [[ -d /opt/can-hub/web ]]; then
     stamp=$(date +%Y%m%d_%H%M%S)
@@ -44,6 +46,7 @@ systemctl daemon-reload
 systemctl enable --now can-hub-vcan.service can-hub-satel.service can-hub-network.path can-hub-power.path
 systemctl enable can-hub-web.service
 systemctl restart can-hub-web.service
+if $restart_display; then systemctl start can-hub-display.service; fi
 echo 'Installed. Open http://<current-IP>/can?lang=en and create the web password.'
 echo 'CAN and LCD require the separate hardware steps in docs/INSTALL.en.md.'
 echo 'No reboot, EEPROM changes or power-monitoring jobs have been installed.'
